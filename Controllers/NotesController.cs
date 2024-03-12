@@ -9,18 +9,18 @@ namespace CRUD_OPERATIONS.Controllers
     [Route("Api/Controller")]
     public class NotesController : Controller
     {
-        private readonly NoteDbContext notesDbContext;
+        private readonly NoteDbContext _notesDbContext;
 
         //Constructor Injector
-        public NotesController()
+        public NotesController(NoteDbContext notesDbContext)
         {
-            this.notesDbContext = notesDbContext;
+            _notesDbContext = notesDbContext;
         }
         [HttpGet]
         public async Task<IActionResult> GetAllNotes()
         {
             //get notes from the database
-           return Ok( await notesDbContext.Notes.ToListAsync());
+           return Ok( await _notesDbContext.Notes.ToListAsync());
         }
 
 
@@ -31,7 +31,7 @@ namespace CRUD_OPERATIONS.Controllers
         {
             //await notesDbContext.Notes.FirstOrDefaultAsync(x => x.Id == id);
 
-           var note = await notesDbContext.Notes.FindAsync(id);
+           var note = await _notesDbContext.Notes.FindAsync(id);
 
             if(note == null)
             {
@@ -44,8 +44,8 @@ namespace CRUD_OPERATIONS.Controllers
         public async Task<IActionResult> AddNote(Note note)
         {
             note.Id = Guid.NewGuid();
-            await notesDbContext.Notes.AddAsync(note);
-            await notesDbContext.SaveChangesAsync();
+            await _notesDbContext.Notes.AddAsync(note);
+            await _notesDbContext.SaveChangesAsync();
             return CreatedAtAction(nameof(GetNoteById),new {id =note.Id},note);
         }
 
@@ -53,7 +53,7 @@ namespace CRUD_OPERATIONS.Controllers
         [Route("{id:Guid}")]
         public async Task<IActionResult> UpdateNote([FromRoute] Guid id, [FromBody] Note updatedNote)
         {
-            var existingNote = await notesDbContext.Notes.FindAsync(id); 
+            var existingNote = await _notesDbContext.Notes.FindAsync(id); 
             if(existingNote == null)
             {
                 return NotFound();
@@ -62,7 +62,7 @@ namespace CRUD_OPERATIONS.Controllers
             existingNote.Description = updatedNote.Description;
             existingNote.IsVisible = updatedNote.IsVisible;
 
-            await notesDbContext.SaveChangesAsync();
+            await _notesDbContext.SaveChangesAsync();
             return Ok(existingNote);
         }
 
@@ -70,13 +70,13 @@ namespace CRUD_OPERATIONS.Controllers
         [Route("{id:Guid}")]
         public async Task<IActionResult> DeleteNote([FromRoute] Guid id)
         {
-            var existingNote = await notesDbContext.Notes.FindAsync(id);
+            var existingNote = await _notesDbContext.Notes.FindAsync(id);
             if (existingNote== null)
             {
                 return NotFound();
             }
-             notesDbContext.Notes.Remove(existingNote);
-            await notesDbContext.SaveChangesAsync();
+             _notesDbContext.Notes.Remove(existingNote);
+            await _notesDbContext.SaveChangesAsync();
             return Ok();
 
         }
